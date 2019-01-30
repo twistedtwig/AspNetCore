@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Browser.Rendering;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Components.Server.Circuits
@@ -15,10 +16,12 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly DefaultCircuitFactoryOptions _options;
+        private readonly ILoggerFactory _loggerFactory;
 
         public DefaultCircuitFactory(
             IServiceScopeFactory scopeFactory,
-            IOptions<DefaultCircuitFactoryOptions> options)
+            IOptions<DefaultCircuitFactoryOptions> options,
+            ILoggerFactory loggerFactory)
         {
             if (options == null)
             {
@@ -27,6 +30,7 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
 
             _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
             _options = options.Value;
+            _loggerFactory = loggerFactory;
         }
 
         public override CircuitHost CreateCircuitHost(HttpContext httpContext, IClientProxy client)
@@ -41,7 +45,13 @@ namespace Microsoft.AspNetCore.Components.Server.Circuits
             var jsRuntime = new RemoteJSRuntime(client);
             var rendererRegistry = new RendererRegistry();
             var synchronizationContext = new CircuitSynchronizationContext();
-            var renderer = new RemoteRenderer(scope.ServiceProvider, rendererRegistry, jsRuntime, client, synchronizationContext);
+            var renderer = new RemoteRenderer(
+                scope.ServiceProvider,
+                rendererRegistry,
+                jsRuntime,
+                client,
+                synchronizationContext,
+                _loggerFactory.CreateLogger<RemoteRenderer>());
 
             var circuitHost = new CircuitHost(
                 scope,
