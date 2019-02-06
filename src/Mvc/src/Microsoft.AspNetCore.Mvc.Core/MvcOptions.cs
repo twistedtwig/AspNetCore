@@ -209,6 +209,21 @@ namespace Microsoft.AspNetCore.Mvc
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value that determines if MVC will ignore the suffix "Async" applied to
+        /// controller action names.
+        /// <para>
+        /// When <see langword="true"/>, MVC will strip action names of the Async suffix.
+        /// Action names are used for routing as well as view lookup. For example, the action
+        /// action <c>ProductsController.ListProductsAsync</c> will be routeable at <c>/Products/ListProducts</c>
+        /// with views looked up at <c>/Views/Products/ListProducts.cshtml</c>.
+        /// </para>
+        /// </summary>
+        /// <value>
+        /// The default value is <c>true</c>.
+        /// </value>
+        public bool SuppressAsyncSuffixInActionNames { get; set; } = true;
+
         IEnumerator<ICompatibilitySwitch> IEnumerable<ICompatibilitySwitch>.GetEnumerator() => _switches.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => _switches.GetEnumerator();

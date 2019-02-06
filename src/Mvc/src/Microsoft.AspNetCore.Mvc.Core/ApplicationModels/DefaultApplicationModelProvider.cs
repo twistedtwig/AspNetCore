@@ -22,6 +22,7 @@ namespace Microsoft.AspNetCore.Mvc.ApplicationModels
         private readonly IModelMetadataProvider _modelMetadataProvider;
         private readonly Func<ActionContext, bool> _supportsAllRequests;
         private readonly Func<ActionContext, bool> _supportsNonGetRequests;
+        private readonly List<IActionModelConvention> _actionModelConventions;
 
         public DefaultApplicationModelProvider(
             IOptions<MvcOptions> mvcOptionsAccessor,
@@ -32,6 +33,12 @@ namespace Microsoft.AspNetCore.Mvc.ApplicationModels
 
             _supportsAllRequests = _ => true;
             _supportsNonGetRequests = context => !string.Equals(context.HttpContext.Request.Method, "GET", StringComparison.OrdinalIgnoreCase);
+
+            _actionModelConventions = new List<IActionModelConvention>();
+            if (_mvcOptions.SuppressAsyncSuffixInActionNames)
+            {
+                _actionModelConventions.Add(new SuppressAsyncSuffixInActionNameConvention());
+            }
         }
 
         /// <inheritdoc />
@@ -91,6 +98,11 @@ namespace Microsoft.AspNetCore.Mvc.ApplicationModels
                             parameterModel.Action = actionModel;
                             actionModel.Parameters.Add(parameterModel);
                         }
+                    }
+
+                    foreach (var convention in _actionModelConventions)
+                    {
+                        convention.Apply(actionModel);
                     }
                 }
             }

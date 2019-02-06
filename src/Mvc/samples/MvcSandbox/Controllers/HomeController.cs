@@ -10,7 +10,7 @@ namespace MvcSandbox.Controllers
         [ModelBinder]
         public string Id { get; set; }
 
-        public IActionResult Index()
+        public IActionResult IndexAsync()
         {
             return View();
         }
